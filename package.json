@@ -1,0 +1,10 @@
+{
+    "repository": "https://https://github.com/zenchain-protocol/monitoring",
+    "license": "MIT",
+    "private": true,
+    "devDependencies": {
+        "@types/node": "^22.13.4",
+        "@vercel/node": "^5.1.7",
+        "typescript": "^5.7.3"
+    }
+}
