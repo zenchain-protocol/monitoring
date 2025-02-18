@@ -1,38 +1,22 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import axios from "axios";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 
-const RPC_URL = "https://zenchain-testnet.api.onfinality.io/public";
+const RPC_URL = "wss://zenchain-testnet.api.onfinality.io/public-ws";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        const finalizedResponse = await axios.post(RPC_URL, {
-            jsonrpc: "2.0",
-            id: 1,
-            method: "chain_getFinalizedHead",
-            params: []
-        });
+        const provider = new WsProvider(RPC_URL);
+        const api = await ApiPromise.create({ provider });
 
-        const finalizedHash = finalizedResponse.data.result;
+        const finalizedHeader = await api.rpc.chain.getFinalizedHead();
+        const finalizedBlock = await api.rpc.chain.getHeader(finalizedHeader);
 
-        const finalizedBlockResponse = await axios.post(RPC_URL, {
-            jsonrpc: "2.0",
-            id: 1,
-            method: "chain_getBlock",
-            params: [finalizedHash]
-        });
+        const bestBlock = await api.rpc.chain.getHeader();
 
-        const finalizedBlockNumber = parseInt(finalizedBlockResponse.data.result.block.header.number, 16);
-
-        const bestBlockResponse = await axios.post(RPC_URL, {
-            jsonrpc: "2.0",
-            id: 1,
-            method: "chain_getBlock",
-            params: []
-        });
-
-        const bestBlockNumber = parseInt(bestBlockResponse.data.result.block.header.number, 16);
-
+        const finalizedBlockNumber = finalizedBlock.number.toNumber();
+        const bestBlockNumber = bestBlock.number.toNumber();
         const lag = bestBlockNumber - finalizedBlockNumber;
+
         const threshold = 100;
 
         res.status(lag > threshold ? 500 : 200).json({
@@ -42,7 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             bestBlock: bestBlockNumber,
             lag: lag
         });
+
     } catch (error) {
         res.status(500).json({ status: "error", message: error.message });
     }
-}
+};

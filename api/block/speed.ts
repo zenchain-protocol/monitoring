@@ -1,27 +1,19 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import axios from "axios";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 
-const RPC_URL = "https://zenchain-testnet.api.onfinality.io/public";
-
-async function getCurrentBlockNumber() {
-    const response = await axios.post(RPC_URL, {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "chain_getBlock",
-        params: []
-    });
-
-    return parseInt(response.data.result.block.header.number, 16);
-}
+const RPC_URL = "wss://zenchain-testnet.api.onfinality.io/public-ws";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
-        const initialBlockNumber = await getCurrentBlockNumber();
+        const provider = new WsProvider(RPC_URL);
+        const api = await ApiPromise.create({ provider });
+
+        const initialBlockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
         const startTime = Date.now();
 
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        const finalBlockNumber = await getCurrentBlockNumber();
+        const finalBlockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
         const endTime = Date.now();
 
         const timeElapsed = (endTime - startTime) / 1000;
@@ -35,7 +27,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             finalBlock: finalBlockNumber,
             speed: speed
         });
+
     } catch (error) {
         res.status(500).json({ status: "error", message: error.message });
     }
-}
+};
