@@ -6,5 +6,8 @@
         "@types/node": "^22.13.4",
         "@vercel/node": "^5.1.7",
         "typescript": "^5.7.3"
+    },
+    "dependencies": {
+        "axios": "^1.7.9"
     }
 }
