@@ -1,11 +1,11 @@
+import 'dotenv/config';
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
-const RPC_URL = "wss://zenchain-testnet.api.onfinality.io/public-ws";
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
     try {
-        const provider = new WsProvider(RPC_URL);
+        const THRESHOLD = Number(process.env.BLOCK_FINALITY_LAG_THRESHOLD_IN_BLOCKS);
+        const provider = new WsProvider(process.env.WSS_RPC_URL);
         const api = await ApiPromise.create({ provider });
 
         const finalizedHeader = await api.rpc.chain.getFinalizedHead();
@@ -17,11 +17,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const bestBlockNumber = bestBlock.number.toNumber();
         const lag = bestBlockNumber - finalizedBlockNumber;
 
-        const threshold = 100;
-
-        res.status(lag > threshold ? 500 : 200).json({
-            status: lag > threshold ? "error" : "ok",
-            message: lag > threshold ? "Finality is stalled!" : "Finality is healthy",
+        res.status(lag > THRESHOLD ? 500 : 200).json({
+            status: lag > THRESHOLD ? "error" : "ok",
+            message: lag > THRESHOLD ? "Finality is stalled!" : "Finality is healthy",
             finalizedBlock: finalizedBlockNumber,
             bestBlock: bestBlockNumber,
             lag: lag

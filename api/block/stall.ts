@@ -1,11 +1,11 @@
+import 'dotenv/config';
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
-const RPC_URL = "wss://zenchain-testnet.api.onfinality.io/public-ws";
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
     try {
-        const provider = new WsProvider(RPC_URL);
+        const threshold = Number(process.env.BLOCK_PRODUCTION_DELAY_THRESHOLD_IN_SECONDS);
+        const provider = new WsProvider(process.env.WSS_RPC_URL);
         const api = await ApiPromise.create({ provider });
 
         const latestBlockHash = await api.rpc.chain.getBlockHash();
@@ -27,7 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const currentTime = Date.now();
 
         let delay = Math.max(0, (currentTime - latestBlockTime) / 1000);
-        const threshold = 10;
 
         res.status(delay > threshold ? 500 : 200).json({
             status: delay > threshold ? "error" : "ok",

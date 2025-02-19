@@ -1,11 +1,10 @@
+import 'dotenv/config';
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
-const RPC_URL = "wss://zenchain-testnet.api.onfinality.io/public-ws";
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(_req: VercelRequest, res: VercelResponse) {
     try {
-        const provider = new WsProvider(RPC_URL);
+        const provider = new WsProvider(process.env.WSS_RPC_URL);
         const api = await ApiPromise.create({ provider });
 
         const initialBlockNumber = (await api.rpc.chain.getHeader()).number.toNumber();
@@ -18,14 +17,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         const timeElapsed = (endTime - startTime) / 1000;
         const blocksProduced = finalBlockNumber - initialBlockNumber;
-        const speed = (blocksProduced / timeElapsed).toFixed(2) + " blocks/sec";
+        const speed = (blocksProduced / timeElapsed);
 
-        res.status(200).json({
-            status: "ok",
-            message: "Syncing speed calculated.",
+        res.status(speed <= 0 ? 500 : 200).json({
+            status: speed <= 0 ? "error" : "ok",
+            message: speed <= 0 ? "Block production is stalled!" : "Block production is healthy",
             initialBlock: initialBlockNumber,
             finalBlock: finalBlockNumber,
-            speed: speed
+            speed: speed.toFixed(2) + " blocks/sec"
         });
 
     } catch (error) {
