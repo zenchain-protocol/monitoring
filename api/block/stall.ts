@@ -2,6 +2,13 @@ import 'dotenv/config';
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
+/**
+ * Detects if block production is stalled by checking the latest block's timestamp.
+ * 
+ * @param {VercelRequest} _req - The request object (not used in this function).
+ * @param {VercelResponse} res - The response object to send the stall status.
+ * @returns Block stall status with time delay details.
+ */
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
     try {
         const threshold = Number(process.env.BLOCK_PRODUCTION_DELAY_THRESHOLD_IN_SECONDS);

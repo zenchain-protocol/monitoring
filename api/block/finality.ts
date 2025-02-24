@@ -2,6 +2,13 @@ import 'dotenv/config';
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
+/**
+ * Checks if block finality is lagging beyond a defined threshold.
+ * 
+ * @param {VercelRequest} _req - The request object (not used in this function).
+ * @param {VercelResponse} res - The response object to send the finality status.
+ * @returns Finality status with block details.
+ */
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
     try {
         const THRESHOLD = Number(process.env.BLOCK_FINALITY_LAG_THRESHOLD_IN_BLOCKS);
