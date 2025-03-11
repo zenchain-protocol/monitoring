@@ -22,13 +22,7 @@ This repository contains a set of **Vercel serverless functions** to monitor **Z
    ```
 
 3. **Set up environment variables**:  
-   - Copy `.env.example` to `.env` and fill in your values:  
-   ```ini
-   BLOCK_FINALITY_LAG_THRESHOLD_IN_BLOCKS=100
-   BLOCK_PRODUCTION_DELAY_THRESHOLD_IN_SECONDS=10
-   BLOCK_SPEED_SECONDS_TO_WAIT_BEFORE_SECOND_REQUEST=5
-   WSS_RPC_URL=wss://zenchain-testnet.api.onfinality.io/public-ws
-   ```
+   - Copy `.env.example` to `.env` and modify the values as your prefer. 
 
 ## 🚀 Running Locally  
 
